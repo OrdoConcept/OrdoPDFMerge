@@ -1,0 +1,77 @@
+Class PDFmerge
+	' add your member fields and procedures here
+    Public Function MergePDFs(CSPDFFileNames As String, Optional OutputPDF As String, Optional PassWord As String = "") As Boolean
+        Dim sFilesIn() As String, sFileOut As String
+        GetLocalData(GetLocaleID())
+        ResetLogs
+        CSPDFFileNames = Replace$(CSPDFFileNames, ";", ",")
+        CSPDFFileNames = Replace$(CSPDFFileNames, "|", ",")
+        If InStr(CSPDFFileNames, ",") = 0 Then
+            AppendLog ("Invalid command: Could not find two or more input files.")
+            Return False ' il n'y a pas au moins deux fichiers
+        End If
+        Dim sTmp As String
+        '************** Saturnian *******************
+        sPassWord = PassWord
+        '********************************************
+        sFileOut = OutputPDF
+        sFilesIn() = Split(CSPDFFileNames, ",")
+        If UBound(sFilesIn) < 1 Then
+            AppendLog "Invalid command: Could not find two or more input files."
+            Return False
+        End If
+        If FilesToTPDF(sFilesIn) > 1 Then ' ****************** Saturnian : Don't work with 2 if we have only two files in command line
+            Dim hr As Long
+            If sFileOut <> "" Then
+                hr = Merge_Pdfs(sFileOut, sList)
+            Else
+                hr = AppendPdfs(sList)
+            End If
+            If hr <> S_OK Then Return False
+            ' Dim i As Long
+            ' Debug.Print "Out=" & sFileOut
+            ' For i = 0 To UBound(sList)
+            '     Debug.Print "In(" & CStr(i) & ")=" & sList(i).sName & "::" & sList(i).sFullPath
+            ' Next
+        Else
+            AppendLog "Invalid command: Could not find two or more input files."
+            Return False
+        End If
+        Return True
+     End Function
+    Public Function GetLastError() As String
+        Return sLastError
+    End Function
+    Public Function GetLogs() As String
+        Return sLogs
+    End Function
+    Public Sub About()
+        AboutMe.Show(vbModal)
+    End Sub
+     Private Function Exist(FilePath As String) As Boolean
+         On Error GoTo ErrorHandler
+         Call FileLen(FilePath)
+         Exist = True
+         Exit Function
+     ErrorHandler:
+         Exist = False
+     End Function
+     
+    Private Function FilesToTPDF(sIn() As String) As Long
+        Dim i As Long
+        Dim j As Long
+        For i = 0 To UBound(sIn)
+            If sIn(i) > "" Then
+                If Exist(sIn(i)) Then
+                    ReDim Preserve sList(j)
+                    sList(j).sFullPath = sIn(i)
+                    sList(j).sName = Right$(sIn(i), Len(sIn(i)) - InStrRev(sIn(i), "\"))
+                    j += 1
+                End If
+          End If
+        Next
+        Return j
+    End Function
+
+    
+End Class

@@ -1,0 +1,83 @@
+
+Module modLocalize
+    
+    Public Inputbox1_Prompt As String ' ="Ce document semble protégé. "
+    Public Inputbox1_Prompt2 As String ' ="Merci de saisir le mot de passe"
+    Public Inputbox1_Title As String  ' = "Protection par mot de passe"
+
+    Public SelectedLanguage As String
+    Private Declare Function GetUserDefaultLCID Lib "kernel32" () As Long
+    
+    Public Function GetLocaleID() As Long
+        Dim LCID As Long
+        'you could use the locale id; the US is 1033
+        Return GetUserDefaultLCID()
+    End Function
+
+    Public Sub GetLocalData(LocaleID As Long)
+        
+        Select Case LocaleID
+            Case 1036, 2060, 3084, 5132, 4108 ' Français
+
+            
+                Inputbox1_Prompt = "Ce document semble protégé. "
+                Inputbox1_Prompt2 = "Merci de saisir le mot de passe"
+                Inputbox1_Title = "Protection par mot de passe"
+            
+                SelectedLanguage = "fra"
+            
+             Case 1031, 3079, 5127, 2055 ' Allemand
+                Inputbox1_Prompt = "Dieses Dokument scheint geschützt zu sein."
+                Inputbox1_Prompt2 = "Bitte geben Sie das Passwort ein"
+                Inputbox1_Title = "Passwortschutz"
+                
+                SelectedLanguage = "deu"
+            
+            Case 1040, 2064 'Italien
+           
+                Inputbox1_Prompt = "Questo documento sembra protetto."
+                Inputbox1_Prompt2 = "Si prega di inserire la password"
+                Inputbox1_Title = "Protezione con password"
+            
+                SelectedLanguage = "ita"
+            
+            Case 1034, 11274, 16394, 13322, 9226, 5130, 7178, 12298, 4106, 18442, 2058, 19466, 6154, 10250, 20490, 15370, 17418, 14346, 8202 ' espagnol
+            
+                Inputbox1_Prompt = "Este documento parece estar protegido."
+                Inputbox1_Prompt2 = "Por favor, introduzca la contraseña"
+                Inputbox1_Title = "Protección por contraseña"
+            
+                SelectedLanguage = "spa"
+            
+            Case 2070, 1046 'Portugais
+            
+                Inputbox1_Prompt = "Este documento parece estar protegido."
+                Inputbox1_Prompt2 = "Por favor, insira a senha"
+                Inputbox1_Title = "Proteção por senha"
+
+                SelectedLanguage = "por"
+            
+            Case 1043, 2067 ' Néerlandais
+            
+                Inputbox1_Prompt = "Dit document lijkt beveiligd te zijn."
+                Inputbox1_Prompt2 = "Voer alstublieft het wachtwoord in"
+                Inputbox1_Title = "Wachtwoordbeveiliging"
+                    
+                SelectedLanguage = "nld"
+            
+            Case Else 'Anglais
+            
+                Inputbox1_Prompt = "This document appears to be protected."
+                Inputbox1_Prompt2 = "Please enter the password"
+                Inputbox1_Title = "Password protection"
+
+                SelectedLanguage = "eng"
+            
+        End Select
+    
+    End Sub
+
+    
+	' add your procedures here
+
+End Module

@@ -20,7 +20,9 @@ Module modPdfium
     
     Public mInit As Boolean
     '************ Saturnian ***************
-    Public mPassWord As String 'stores any password if necessary
+    Public sPassWord As String 'stores any password if necessary
+    Public sLastError As String
+    Public sLogs As String
     '**************************************
     Public Type tPdfFile
         sFullPath As String
@@ -31,6 +33,10 @@ Module modPdfium
     Public sList() As tPdfFile
     Public nPdf As Long
     Public sIdx As String
+    
+    
+
+    
     
     Public Type tPdfSearchResult
         nPage As Long 'The page the result is from
@@ -107,32 +113,40 @@ Module modPdfium
         FPDF_CONSECUTIVE = &H00000004
     End Enum
     
-    Private Declare PtrSafe Sub FPDF_InitLibrary CDecl Lib "pdfium" ()
-    Private Declare PtrSafe Sub FPDF_DestroyLibrary CDecl Lib "pdfium" ()
-    Private Declare PtrSafe Function FPDF_CreateNewDocument CDecl Lib "pdfium" () As LongPtr
-    Private Declare PtrSafe Function FPDF_LoadDocument CDecl Lib "pdfium" (ByVal file_path As String, ByVal password As String) As LongPtr
-    Private Declare PtrSafe Function FPDF_LoadMemDocument CDecl Lib "pdfium" (ByVal pData As LongPtr, ByVal DataLen As Long, ByVal Password As String) As LongPtr
-    Private Declare PtrSafe Sub FPDF_CloseDocument CDecl Lib "pdfium" (ByVal hDoc As LongPtr)
-    Private Declare PtrSafe Function FPDF_GetPageCount CDecl Lib "pdfium" (ByVal hDoc As LongPtr) As Long
-    Private Declare PtrSafe Function FPDF_LoadPage CDecl Lib "pdfium" (ByVal hDoc As LongPtr, ByVal PageIdx As Long) As LongPtr
-    Private Declare PtrSafe Sub FPDF_ClosePage CDecl Lib "pdfium" (ByVal hPage As LongPtr)
-    Private Declare PtrSafe Function FPDF_ImportPages CDecl Lib "pdfium" (ByVal dest_doc As LongPtr, ByVal src_doc As LongPtr, ByVal pagerange As String, ByVal index As Long) As Long
-    Private Declare PtrSafe Function FPDF_SaveAsCopy CDecl Lib "pdfium" (ByVal document As LongPtr, pFileWrite As FPDF_FILEWRITE, ByVal flags As PdfiumSaveCopyFlags) As BOOL
-    Private Declare PtrSafe Function FPDF_GetLastError CDecl Lib "pdfium" () As Long
-    Private Declare PtrSafe Function FPDFText_LoadPage CDecl Lib "pdfium" (ByVal page As LongPtr) As LongPtr
-    Private Declare PtrSafe Sub FPDFText_ClosePage CDecl Lib "pdfium" (ByVal text_page As LongPtr)
-    Private Declare PtrSafe Function FPDFText_CountChars CDecl Lib "pdfium" (ByVal text_page As LongPtr) As Long
+    Private Declare PtrSafe Sub FPDF_InitLibrary CDecl Lib "pdfium_x86" ()
+    Private Declare PtrSafe Sub FPDF_DestroyLibrary CDecl Lib "pdfium_x86" ()
+    Private Declare PtrSafe Function FPDF_CreateNewDocument CDecl Lib "pdfium_x86" () As LongPtr
+    Private Declare PtrSafe Function FPDF_LoadDocument CDecl Lib "pdfium_x86" (ByVal file_path As String, ByVal password As String) As LongPtr
+    Private Declare PtrSafe Function FPDF_LoadMemDocument CDecl Lib "pdfium_x86" (ByVal pData As LongPtr, ByVal DataLen As Long, ByVal Password As String) As LongPtr
+    Private Declare PtrSafe Sub FPDF_CloseDocument CDecl Lib "pdfium_x86" (ByVal hDoc As LongPtr)
+    Private Declare PtrSafe Function FPDF_GetPageCount CDecl Lib "pdfium_x86" (ByVal hDoc As LongPtr) As Long
+    Private Declare PtrSafe Function FPDF_LoadPage CDecl Lib "pdfium_x86" (ByVal hDoc As LongPtr, ByVal PageIdx As Long) As LongPtr
+    Private Declare PtrSafe Sub FPDF_ClosePage CDecl Lib "pdfium_x86" (ByVal hPage As LongPtr)
+    Private Declare PtrSafe Function FPDF_ImportPages CDecl Lib "pdfium_x86" (ByVal dest_doc As LongPtr, ByVal src_doc As LongPtr, ByVal pagerange As String, ByVal index As Long) As Long
+    Private Declare PtrSafe Function FPDF_SaveAsCopy CDecl Lib "pdfium_x86" (ByVal document As LongPtr, pFileWrite As FPDF_FILEWRITE, ByVal flags As PdfiumSaveCopyFlags) As BOOL
+    Private Declare PtrSafe Function FPDF_GetLastError CDecl Lib "pdfium_x86" () As Long
+    Private Declare PtrSafe Function FPDFText_LoadPage CDecl Lib "pdfium_x86" (ByVal page As LongPtr) As LongPtr
+    Private Declare PtrSafe Sub FPDFText_ClosePage CDecl Lib "pdfium_x86" (ByVal text_page As LongPtr)
+    Private Declare PtrSafe Function FPDFText_CountChars CDecl Lib "pdfium_x86" (ByVal text_page As LongPtr) As Long
     'result is 'As Any' instead of ByRef Integer so you can either use it that official way, or:
     'Allocate a string and copy into StrPtr. 
-    Private Declare PtrSafe Function FPDFText_GetText CDecl Lib "pdfium" (ByVal text_page As LongPtr, ByVal start_index As Long, ByVal count As Long, result As Any) As Long
-    Private DeclareWide PtrSafe Function FPDFText_FindStart CDecl Lib "pdfium" (ByVal text_page As LongPtr, ByVal findwhat As String, ByVal flags As PdfiumSearchFlags, ByVal start_index As Long) As LongPtr
-    Private Declare PtrSafe Function FPDFText_FindNext CDecl Lib "pdfium" (ByVal handle As LongPtr) As BOOL
-    Private Declare PtrSafe Function FPDFText_FindPrev CDecl Lib "pdfium" (ByVal handle As LongPtr) As BOOL
-    Private Declare PtrSafe Function FPDFText_GetSchResultIndex CDecl Lib "pdfium" (ByVal handle As LongPtr) As Long
-    Private Declare PtrSafe Function FPDFText_GetSchCount CDecl Lib "pdfium" (ByVal handle As LongPtr) As Long
-    Private Declare PtrSafe Sub FPDFText_FindClose CDecl Lib "pdfium" (ByVal handle As LongPtr)
+    Private Declare PtrSafe Function FPDFText_GetText CDecl Lib "pdfium_x86" (ByVal text_page As LongPtr, ByVal start_index As Long, ByVal count As Long, result As Any) As Long
+    Private DeclareWide PtrSafe Function FPDFText_FindStart CDecl Lib "pdfium_x86" (ByVal text_page As LongPtr, ByVal findwhat As String, ByVal flags As PdfiumSearchFlags, ByVal start_index As Long) As LongPtr
+    Private Declare PtrSafe Function FPDFText_FindNext CDecl Lib "pdfium_x86" (ByVal handle As LongPtr) As BOOL
+    Private Declare PtrSafe Function FPDFText_FindPrev CDecl Lib "pdfium_x86" (ByVal handle As LongPtr) As BOOL
+    Private Declare PtrSafe Function FPDFText_GetSchResultIndex CDecl Lib "pdfium_x86" (ByVal handle As LongPtr) As Long
+    Private Declare PtrSafe Function FPDFText_GetSchCount CDecl Lib "pdfium_x86" (ByVal handle As LongPtr) As Long
+    Private Declare PtrSafe Sub FPDFText_FindClose CDecl Lib "pdfium_x86" (ByVal handle As LongPtr)
  
-
+    Public Sub AppendLog(smsg As String)
+        sLastError = smsg
+        sLogs = sLogs + smsg + vbCrLf
+        Debug.Print smsg
+    End Sub
+    Public Sub ResetLogs()
+        sLastError = ""
+        sLogs = ""
+    End Sub
     Public Function GetPdfiumErrorCodesStr(lVal As Long) As String
     Dim sRet As String
      If lVal = FPDF_ERR_SUCCESS Then sRet = "FPDF_ERR_SUCCESS"
@@ -183,17 +197,18 @@ Module modPdfium
         hr = LoadFileBytes(tPdf.sFullPath, pFile)
         If hr = S_OK Then
             '************ Saturnian ***************
-            hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, mPassWord)
+            hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, sPassWord)
             Do Until hDoc <> 0
                 ' if hDoc = 0 : Unable to open PDF file
                 ' This may be a password-protected PDF: The user is asked for a password
-                mPassWord = InputBox("The document '" & tPdf.sName & "' appears to be protected." & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & "Please enter the password", "Password protection", "")
-                If mPassWord = "" Then ' No password entered or click "Cancel"
+                'sPassWord = InputBox("The document '" & tPdf.sName & "' appears to be protected." & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & "Please enter the password", "Password protection", "")
+                sPassWord = InputBox("'" & tPdf.sName & "' : " & Inputbox1_Prompt & vbCrLf & vbCrLf & Inputbox1_Prompt2, Inputbox1_Title)
+                If sPassWord = "" Then ' No password entered or click "Cancel"
                     Screen.MousePointer = vbArrow
                     Exit Do
                 Else
                     ' Attempt to reopen with password
-                    hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, mPassWord)
+                    hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, sPassWord)
                 End If
             Loop
             '**************************************
@@ -209,8 +224,9 @@ Module modPdfium
         tPdf.nPageCount = nPages
         Return nPages
     End Function
-    Public Function MergePdfs(sFileOut As String, tFilesIn() As tPdfFile, Optional bTemp As Boolean = False) As Long
+    Public Function Merge_Pdfs(sFileOut As String, tFilesIn() As tPdfFile, Optional bTemp As Boolean = False) As Long
         InitPdfium()
+        
         If UBound(tFilesIn) = 0 Then
             AppendLog "Error: One or more files must be selected to merge."
             Return E_INVALIDARG
@@ -242,17 +258,18 @@ Module modPdfium
             hr = LoadFileBytes(tFilesIn(i).sFullPath, pFile)
             If hr = S_OK Then
                 '************ Saturnian ***************
-                hDocIn = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, mPassWord)
+                hDocIn = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, sPassWord)
                 Do Until hDocIn <> 0
                     ' if hDoc = 0 : Unable to open PDF file
                     ' This may be a password-protected PDF: The user is asked for a password
-                    mPassWord = InputBox("The document '" & tFilesIn(i).sName & "' appears to be protected." & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & "Please enter the password", "Password protection", "")
-                    If mPassWord = "" Then ' No password entered or click "Cancel"
+                    'sPassWord = InputBox("The document '" & tFilesIn(i).sName & "' appears to be protected." & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & "Please enter the password", "Password protection", "")
+                    sPassWord = InputBox("'" & tFilesIn(i).sName & "' : " & Inputbox1_Prompt & vbCrLf & vbCrLf & Inputbox1_Prompt2, Inputbox1_Title)
+                    If sPassWord = "" Then ' No password entered or click "Cancel"
                         Screen.MousePointer = vbArrow
                         Exit Do
                     Else
                         ' Attempt to reopen with password
-                        hDocIn = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, mPassWord)
+                        hDocIn = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, sPassWord)
                     End If
                 Loop
                 '**************************************
@@ -328,7 +345,7 @@ Module modPdfium
         Dim lAtr As FILE_ATTRIBUTES
         sOut = TrimNullW(sTmp)
         AppendLog "AppendPdfs::TempName=" & sOut
-        If MergePdfs(sOut, tFilesIn, True) = S_OK Then
+        If Merge_Pdfs(sOut, tFilesIn, True) = S_OK Then
             Debug.Print "AppendPdfs::DeleteOrig=" & tFilesIn(0).sFullPath
             Dim hr As Long = DeleteFileEx(tFilesIn(0).sFullPath)
             If hr <> S_OK Then
@@ -364,17 +381,18 @@ Module modPdfium
         hr = LoadFileBytes(tPdf.sFullPath, pFile)
         If hr = S_OK Then
             '************ Saturnian ***************
-            hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, mPassWord)
+            hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, sPassWord)
             Do Until hDoc <> 0
                 ' if hDoc = 0 : Unable to open PDF file
                 ' This may be a password-protected PDF: The user is asked for a password
-                mPassWord = InputBox("The document '" & tPdf.sName & "' appears to be protected." & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & "Please enter the password", "Password protection", "")
-                If mPassWord = "" Then ' No password entered or click "Cancel"
+                'sPassWord = InputBox("The document '" & tPdf.sName & "' appears to be protected." & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & vbCrLf & "Please enter the password", "Password protection", "")
+                sPassWord = InputBox("'" & tPdf.sName & "' : " & Inputbox1_Prompt & vbCrLf & vbCrLf & Inputbox1_Prompt2, Inputbox1_Title)
+                If sPassWord = "" Then ' No password entered or click "Cancel"
                     Screen.MousePointer = vbArrow
                     Exit Do
                 Else
                     ' Attempt to reopen with password
-                    hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, mPassWord)
+                    hDoc = FPDF_LoadMemDocument(VarPtr(pFile(0)), UBound(pFile) + 1, sPassWord)
                 End If
             Loop
             '**************************************

@@ -1,0 +1,35 @@
+[Description("")]
+[FormDesignerId("72BDD4A5-89EF-46D3-B82D-9EB5A81AA764")]
+[PredeclaredId]
+Private Class AboutMe
+
+	Sub New()
+	End Sub
+    
+    Private Sub Command1_Click()
+        Unload Me
+    End Sub
+    
+    Private Sub Form_Load()
+        Label4.Caption = "Version : " & App.Major & "." & App.Minor & "." & App.Build & "." & App.Revision
+    End Sub
+    
+    Private Sub Label1_Click()
+        ShellExecute 0, "open", "https://github.com/fafalone/gPdfMerge", "", "", SW_MAXIMIZE
+    End Sub
+    
+    Private Sub Label6_Click()
+        ShellExecute 0, "open", "https://github.com/bblanchon/pdfium-binaries?tab=readme-ov-file", "", "", SW_MAXIMIZE
+    End Sub
+    
+    Private Sub Image1_Click()
+        ShellExecute 0, "open", "https://freeware.ordoconcept.net/", "", "", SW_MAXIMIZE
+    End Sub
+    
+    Private Sub Label2_Click()
+        
+    End Sub
+    
+    
+
+End Class

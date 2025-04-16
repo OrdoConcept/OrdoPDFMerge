@@ -1,0 +1,14 @@
+
+Module MainModule
+
+    ' This project type is set to 'ActiveX DLL' in the Settings file
+    'essai
+    ' Public PDFM As PDFMerge.PDFmerge
+    ' Public Sub Main()
+    '     Dim bRet As Boolean
+    '     Set PDFM = New PDFMerge.PDFmerge
+    '     bRet = PDFM.MergePDFs(App.Path & "\Test.pdf" & "," & App.Path & "\Graph.pdf", App.Path & "\Result.pdf")
+    ' End Sub
+
+    
+End Module
